@@ -1,0 +1,6 @@
+Build/Output/
+Build/Listing/
+*.uvguix.*
+*.bak
+*.orig
+*.dep
