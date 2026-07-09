@@ -169,8 +169,8 @@
 
 | 外设 | 引脚 | 说明 |
 | --- | --- | --- |
-| USART1 (蓝牙) | PA9 (TX) / PA10 (RX) | 波特率 9600，连接 HC-05 |
-| USART2 (调试) | PA2 (TX) / PA3 (RX) | 波特率 115200 |
+| USART1 (调试) | PA9 (TX) / PA10 (RX) | 波特率 9600，连接上位机串口 |
+| USART2 (蓝牙) | PA2 (TX) / PA3 (RX) | 波特率 115200，连接 HC-05 蓝牙模块 |
 | USART3 (WiFi) | PB10 (TX) / PB11 (RX) | 波特率 115200，连接 ESP8266 |
 | 超声波 Trig | PA7 | 推挽输出 |
 | 超声波 Echo | PA6 (TIM3_CH1) | 输入捕获测脉宽 |
@@ -225,7 +225,7 @@
 
 ### 4.2 串口通信驱动实现
 
-**实现方法**：系统共使用 3 路 USART——USART1（蓝牙，PA9/PA10，9600bps）、USART2（调试，PA2/PA3，115200bps）、USART3（ESP8266，PB10/PB11，115200bps）。每路串口均配置为异步模式：1 位起始位、8 位数据位、1 位停止位、无校验。USART1 和 USART2 使用 NVIC 中断接收，USART3 使用中断接收配合大缓冲区处理 ESP8266 响应。所有串口提供统一的初始化、发送字节、发送字符串和 printf 重定向接口。
+**实现方法**：系统共使用 3 路 USART——USART1（调试串口，PA9/PA10，9600bps）、USART2（蓝牙，PA2/PA3，115200bps）、USART3（ESP8266，PB10/PB11，115200bps）。每路串口均配置为异步模式：1 位起始位、8 位数据位、1 位停止位、无校验。USART1 和 USART2 使用 NVIC 中断接收，USART3 使用中断接收配合大缓冲区处理 ESP8266 响应。所有串口提供统一的初始化、发送字节、发送字符串和 printf 重定向接口。
 
 命令解析在 parse_cmd() 函数中统一完成：uart_flag 标志位指示是否有待处理命令，uart_buf 存储命令字符串。parse_cmd() 依次处理蓝牙指令（mb）、MQTT 下行路由指令（rb）和调试指令，通过 strstr() 匹配命令关键字并执行对应操作。支持的命令包括：goA/goB/goL/goR（运动）、stop（停止）、speedup/speeddown（速度 ±100）、lspeedup/lspeeddown（左轮微调 ±10）、rspeedup/rspeeddown（右轮微调 ±10）、remote/auto/follow（模式切换）等。
 
