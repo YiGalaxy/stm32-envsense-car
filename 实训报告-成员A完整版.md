@@ -175,6 +175,14 @@
 | 超声波 Trig | PA7 | 推挽输出 |
 | 超声波 Echo | PA6 (TIM3_CH1) | 输入捕获测脉宽 |
 | 红外避障 ×4 | PF5~PF8 | 上拉输入，低电平=有障碍 |
+| OLED I2C | PG12(SCL) / PD5(SDA) / PD4(RES) | GPIO 模拟 I2C 驱动 SSD1306 |
+| 舵机 PWM | PA0 (TIM2_CH1) | 50Hz，0.5ms~2.5ms→0°~180° |
+| 电机 PWM | PB6 (TIM4_CH1) / PB7 (TIM4_CH2) | 右轮/左轮，1kHz |
+| 电机方向 | PB12/PB13 (右轮) / PB14/PB15 (左轮) | TB6612 驱动 IN1~IN4 |
+| DHT11 | PA1 | 单总线温湿度 |
+| LED0 / LED1 | PB5 / PE5 | 推挽输出，低电平点亮 |
+| 蜂鸣器 | PF0 | 有源蜂鸣器 |
+| KEY0 / KEY1 | PE4 / PE3 | 上拉输入 + EXTI 中断 |
 
 ### 3.3 华为云 MQTT 设计
 
@@ -184,8 +192,10 @@
 
 | Topic | 方向 | 说明 |
 | --- | --- | --- |
-| `$oc/devices/{id}/sys/properties/report` | 上报 | 设备属性上报 |
-| `$oc/devices/{id}/sys/commands/#` | 订阅 | 平台命令下发 |
+| `$oc/devices/{id}/sys/properties/report` | 上报 | 设备属性上报（温湿度、游戏分数） |
+| `$oc/devices/{id}/sys/messages/down` | 订阅 | 平台消息下发 |
+| `$oc/devices/{id}/sys/commands/#` | 订阅 | 平台命令下发（通配符匹配） |
+| `$oc/devices/{id}/sys/commands/response/request_id={id}` | 上报 | 命令执行响应 |
 
 （3）数据上报格式（JSON）：
 
@@ -497,7 +507,7 @@ while(1):
   └── delay_ms(80)
 ```
 
-中断优先级配置：USART1/2/3 抢占优先级 1 子优先级 0/0/0，TIM3 输入捕获 1/1，EXTI 按键 2/0。
+中断优先级配置：TIM3 输入捕获（超声波）抢占优先级 1 子优先级 1（最高），USART1/2/3 和 KEY1(EXTI3) 优先级 2/2，KEY0(EXTI4) 优先级 3/3（最低）。
 
 ### 4.10 WiFi + MQTT 连接初始化
 
